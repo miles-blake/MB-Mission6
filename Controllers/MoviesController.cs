@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Mission06_Blake.Models;
 
 namespace Mission06_Blake.Controllers
@@ -8,25 +6,22 @@ namespace Mission06_Blake.Controllers
     public class MoviesController : Controller
     {
         private readonly MovieContext _context;
-        private readonly ILogger<MoviesController> _logger;
+        private readonly ILogger<MoviesController> _logger; // Add a logger
 
         public MoviesController(MovieContext context, ILogger<MoviesController> logger)
         {
             _context = context;
-            _logger = logger;
+            _logger = logger; // Initialize logger
         }
 
-        // --------------------------------------
-        // CREATE
-        // --------------------------------------
+        // Show the form
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.CategoryId = new SelectList(_context.Categories, "CategoryId", "CategoryName");
             return View();
         }
 
-
+        // Process the form submission
         [HttpPost]
         public IActionResult Create(Movie movie)
         {
@@ -36,104 +31,32 @@ namespace Mission06_Blake.Controllers
             {
                 _logger.LogWarning("Model state is invalid.");
 
-                // More detailed per‐key error logging
-                foreach (var state in ModelState)
+                // 🔹 Log all validation errors to the console
+                foreach (var error in ModelState)
                 {
-                    var fieldKey = state.Key;             // e.g. "CategoryId" or "Category"
-                    var fieldErrors = state.Value.Errors; 
-                    if (fieldErrors.Count > 0)
+                    foreach (var subError in error.Value.Errors)
                     {
-                        foreach (var err in fieldErrors)
-                        {
-                            _logger.LogError($"Key '{fieldKey}' had error: {err.ErrorMessage}");
-                        }
+                        _logger.LogError($"Validation error in '{error.Key}': {subError.ErrorMessage}");
                     }
                 }
 
-                ViewBag.CategoryId = new SelectList(_context.Categories, "CategoryId", "CategoryName", movie.CategoryId);
-                return View(movie);
+                return View(movie); // Return form with errors
             }
 
-
+            _logger.LogInformation("Model is valid. Adding movie...");
             _context.Movies.Add(movie);
             _context.SaveChanges();
+            _logger.LogInformation("Movie saved successfully!");
+
             return RedirectToAction("Index");
         }
 
-        // --------------------------------------
-        // READ (INDEX)
-        // --------------------------------------
+
+        // Display all movies
         public IActionResult Index()
         {
-            var movies = _context.Movies.Include(m => m.Category).ToList();
+            var movies = _context.Movies.ToList();
             return View(movies);
         }
-
-        // --------------------------------------
-        // EDIT
-        // --------------------------------------
-        [HttpGet]
-        public IActionResult Edit(int id)
-        {
-            var movie = _context.Movies.Find(id);
-            if (movie == null)
-            {
-                return NotFound();
-            }
-            ViewBag.CategoryId = new SelectList(_context.Categories, "CategoryId", "CategoryName", movie.CategoryId);
-            return View(movie);
-        }
-
-        [HttpPost]
-        public IActionResult Edit(Movie movie)
-        {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.CategoryId = new SelectList(_context.Categories, "CategoryId", "CategoryName", movie.CategoryId);
-                return View(movie);
-            }
-
-            _context.Movies.Update(movie);
-            _context.SaveChanges();
-            return RedirectToAction("Index");
-        }
-
-
-        // --------------------------------------
-// DELETE
-// --------------------------------------
-        [HttpGet]
-        public IActionResult Delete(int id)
-        {
-            var movie = _context.Movies
-                .Include(m => m.Category)
-                .FirstOrDefault(m => m.MovieId == id);
-
-            if (movie == null)
-            {
-                return NotFound();
-            }
-
-            // Renders Delete.cshtml, which asks the user “Are you sure?”
-            return View(movie);
-        }
-
-        [HttpPost]
-        public IActionResult DeleteConfirmed(int id)
-        {
-            // Actually remove from DB
-            var movie = _context.Movies.Find(id);
-
-            if (movie == null)
-            {
-                return NotFound();
-            }
-
-            _context.Movies.Remove(movie);
-            _context.SaveChanges();
-
-            return RedirectToAction("Index");
-        }
-
     }
 }

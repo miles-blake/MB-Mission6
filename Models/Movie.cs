@@ -7,36 +7,27 @@ namespace Mission06_Blake.Models
         [Key]
         public int MovieId { get; set; }
 
-        [Required(ErrorMessage = "Title is required")]
+        [Required(ErrorMessage = "Title is required.")]
         public string Title { get; set; }
 
-        // Foreign key for Category. EF will infer the FK from "CategoryId" + the nav property "Category"
-        [Required(ErrorMessage = "A Category must be selected")]
-        [Display(Name = "Category")]
-        public int CategoryId { get; set; }
+        [Required(ErrorMessage = "Category is required.")]
+        public string Category { get; set; }
 
-        // Navigation property
-        public Category? Category { get; set; }
+        [Required(ErrorMessage = "Director is required.")]
+        public string Director { get; set; }
 
-        // Director is optional
-        public string? Director { get; set; }
-
-        [Required(ErrorMessage = "Year is required")]
-        [Range(1888, 9999, ErrorMessage = "Year cannot be before 1888")]
+        [Required(ErrorMessage = "Year is required.")]
+        [Range(1888, 2100, ErrorMessage = "Year must be between 1888 and 2100.")]
         public int Year { get; set; }
 
-        // Rating is optional
-        public string? Rating { get; set; }
+        [Required(ErrorMessage = "Rating is required.")]
+        public string Rating { get; set; } // G, PG, PG-13, R
 
-        [Required(ErrorMessage = "Please specify if this is Edited or not")]
-        public bool Edited { get; set; }
+        public bool Edited { get; set; } // ✅ Defaults to false if unchecked
 
-        [Required(ErrorMessage = "Please specify if this is Copied to Plex")]
-        public bool CopiedToPlex { get; set; }
+        public string? LentTo { get; set; } // ✅  optional
 
-        public string? LentTo { get; set; }
-
-        [MaxLength(25)]
-        public string? Notes { get; set; }
+        [StringLength(25, ErrorMessage = "Notes must be 25 characters or fewer.")]
+        public string? Notes { get; set; } // ✅  optional
     }
 }
