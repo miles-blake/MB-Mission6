@@ -6,6 +6,7 @@ namespace Mission06_Blake.Models
     {
         public MovieContext(DbContextOptions<MovieContext> options) : base(options) { }
 
-        public DbSet<Movie> Movies { get; set; } // Movies Table
+        public DbSet<Movie> Movies { get; set; }
+        public DbSet<Category> Categories { get; set; } // New for Mission #7
     }
 }
